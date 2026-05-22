@@ -11,7 +11,7 @@
             --tile-bg: #cdc1b4;
             --text-dark: #776e65;
             --text-light: #f9f6f2;
-            --accent: #edc22e; /* Kolor kafelka 256 */
+            --accent: #edc22e;
         }
 
         body {
@@ -25,17 +25,17 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            overflow: hidden; /* Blokuje scrollowanie strony na telefonie */
-            touch-action: none; /* Ważne dla swipe */
+            overflow: hidden;
+            touch-action: none; 
         }
 
         #header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
-        h1 { margin: 0; font-size: 32px; }
-        #score-container { font-size: 20px; font-weight: bold; }
+        h1 { margin: 0; font-size: 36px; }
+        #score-container { font-size: 22px; font-weight: bold; margin-top: 5px; }
 
         #game-container {
             width: 320px;
@@ -43,32 +43,21 @@
             background-color: var(--grid-bg);
             border-radius: 6px;
             position: relative;
-            padding: 10px;
-            box-sizing: border-box;
         }
 
-        .grid-row {
-            display: flex;
-            margin-bottom: 10px;
-        }
-
-        .grid-row:last-child { margin-bottom: 0; }
-
-        .grid-cell {
-            width: 67.5px;
-            height: 67.5px;
-            margin-right: 10px;
-            background-color: rgba(238, 228, 218, 0.35);
-            border-radius: 3px;
-        }
-
-        .grid-cell:last-child { margin-right: 0; }
-
-        .tile {
+        .grid-cell, .tile {
             width: 67.5px;
             height: 67.5px;
             border-radius: 3px;
             position: absolute;
+        }
+
+        .grid-cell {
+            background-color: rgba(238, 228, 218, 0.35);
+            z-index: 1;
+        }
+
+        .tile {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -78,7 +67,6 @@
             z-index: 10;
         }
 
-        /* Kolory Kafelków */
         .tile-2    { background: #eee4da; color: var(--text-dark); }
         .tile-4    { background: #ede0c8; color: var(--text-dark); }
         .tile-8    { background: #f2b179; color: var(--text-light); }
@@ -88,26 +76,53 @@
         .tile-128  { background: #edcf72; color: var(--text-light); font-size: 28px;}
         .tile-256  { background: var(--accent); color: var(--text-light); font-size: 28px; box-shadow: 0 0 15px var(--accent);}
 
-        /* Ekran Zwycięstwa */
         #victory-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(242, 177, 121, 0.9); /* Kolor tła życzeń */
+            background-color: rgba(245, 237, 227, 0.98);
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 100;
             text-align: center;
-            color: var(--text-light);
-            padding: 20px;
+            color: var(--text-dark);
+            padding: 25px;
             box-sizing: border-box;
-            animation: fadeIn 0.5s;
+            animation: fadeIn 0.8s ease-out;
+            overflow-y: auto;
         }
 
-        #victory-overlay h2 { font-size: 48px; margin-bottom: 10px; }
-        #victory-overlay p { font-size: 24px; margin: 10px 0; line-height: 1.4; }
-        #victory-overlay .heart { font-size: 60px; color: #e74c3c; margin-top: 20px;}
+        #victory-overlay h2 { 
+            font-size: 38px; 
+            margin-bottom: 15px; 
+            color: #d35400;
+        }
+        
+        #victory-overlay .wishes-text {
+            font-size: 19px; 
+            line-height: 1.6; 
+            max-width: 500px;
+            margin: 0 auto 25px auto;
+            color: #444;
+            text-align: left;
+        }
+
+        #victory-overlay .heart-text {
+            font-size: 26px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        #victory-overlay img {
+            max-width: 280px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin-top: 10px;
+        }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -121,43 +136,57 @@
     </div>
 
     <div id="game-container">
-        <!-- Siatka tła -->
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-        
-        <!-- Tu będą wskakiwać kafelki gry -->
+        <div id="grid-background"></div>
         <div id="tile-container"></div>
     </div>
 
-    <!-- EKRAN ZWYCIĘSTWA -->
     <div id="victory-overlay">
-        <!-- ========================================= -->
-        <!-- TU MOŻESZ ZMIENIĆ TEKST ŻYCZEŃ -->
-        <h2>WSZYSTKIEGO NAJLEPSZEGO!</h2>
-        <p>Udało Ci się zebrać 256!</p>
-        <p>Z okazji Twoich 23 urodzin życzę Ci wszystkiego co najwspanialsze, spełnienia marzeń i samych sukcesów.</p>
-        <div class="heart">Kocham Cię ❤️</div>
-        <!-- ========================================= -->
+        <h2>Moja ukochana Kruszynko!</h2>
+        
+        <div class="wishes-text">
+            Z okazji urodzin życzę Ci z całego serca wszystkiego, co najpiękniejsze. Dziękuję Ci za każdą wspólną chwilę – za to, że po prostu jesteś, wspierasz mnie i sprawiasz, że każdy mój dzień jest wyjątkowy. Nieważne ile kilometrów muszę pokonać, żeby do Ciebie dotrzeć, zawsze jest warto. <br><br>
+            Życzę Ci spełnienia Twoich najskrytszych marzeń, nieskończonych pokładów uśmiechu i radości. Nie mogę się doczekać naszych nadchodzących, wspólnych podróży – tych w blasku słońca i tych dopiero planowanych. Tyle cudownych wspomnień wciąż przed nami.
+        </div>
+        
+        <div class="heart-text">Kocham Cię niesamowicie mocno! ❤️</div>
+
+        <img src="nasze-zdjecie.png" alt="My razem" onerror="this.style.display='none'"> 
     </div>
 
     <script>
-        // Logika gry w czystym JavaScript
         const size = 4;
-        const targetValue = 256; // CEL GRY
+        const targetValue = 256; 
         let board = [];
         let score = 0;
         let isGameWon = false;
 
         const gameContainer = document.getElementById('game-container');
+        const bgContainer = document.getElementById('grid-background');
         const tileContainer = document.getElementById('tile-container');
         const scoreDisplay = document.getElementById('score');
         const victoryOverlay = document.getElementById('victory-overlay');
 
-        // Rozmiary i marginesy kafelków (zgodne z CSS)
         const tileSize = 67.5;
         const tileMargin = 10;
+
+        function getPosition(row, col) {
+            let top = tileMargin + row * (tileSize + tileMargin);
+            let left = tileMargin + col * (tileSize + tileMargin);
+            return { top, left };
+        }
+
+        function createGridBackground() {
+            bgContainer.innerHTML = '';
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    let cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    let pos = getPosition(r, c);
+                    cell.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+                    bgContainer.appendChild(cell);
+                }
+            }
+        }
 
         function initGame() {
             board = Array(size).fill(0).map(() => Array(size).fill(0));
@@ -166,12 +195,13 @@
             tileContainer.innerHTML = '';
             victoryOverlay.style.display = 'none';
             scoreDisplay.innerText = score;
+            
+            createGridBackground();
             addRandomTile();
             addRandomTile();
             drawBoard();
         }
 
-        // Dodaje 2 lub 4 w pustym miejscu
         function addRandomTile() {
             let emptyCells = [];
             for (let r = 0; r < size; r++) {
@@ -185,7 +215,6 @@
             }
         }
 
-        // Rysuje kafelki na podstawie macierzy board
         function drawBoard() {
             tileContainer.innerHTML = '';
             for (let r = 0; r < size; r++) {
@@ -196,14 +225,11 @@
                         tileDiv.className = `tile tile-${value}`;
                         tileDiv.innerText = value;
                         
-                        // Obliczanie pozycji Absolutnej
-                        let top = tileMargin + r * (tileSize + tileMargin);
-                        let left = tileMargin + c * (tileSize + tileMargin);
-                        tileDiv.style.transform = `translate(${left}px, ${top}px)`;
+                        let pos = getPosition(r, c);
+                        tileDiv.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
                         
                         tileContainer.appendChild(tileDiv);
 
-                        // Sprawdź czy wygrana
                         if (value === targetValue && !isGameWon) {
                             endGame();
                         }
@@ -217,14 +243,11 @@
             isGameWon = true;
             setTimeout(() => {
                 victoryOverlay.style.display = 'flex';
-            }, 500); // Małe opóźnienie, żeby zobaczyć kafelek 256
+            }, 600); 
         }
 
-        // --- LOGIKA RUCHU ---
         function slide(row) {
-            // [0, 2, 2, 2] -> [2, 2, 2]
             let arr = row.filter(val => val);
-            // [2, 2, 2] -> [4, 0, 2]
             for (let i = 0; i < arr.length - 1; i++) {
                 if (arr[i] === arr[i + 1]) {
                     arr[i] *= 2;
@@ -232,9 +255,7 @@
                     arr[i + 1] = 0;
                 }
             }
-            // [4, 0, 2] -> [4, 2]
             arr = arr.filter(val => val);
-            // [4, 2] -> [4, 2, 0, 0]
             while (arr.length < size) {
                 arr.push(0);
             }
@@ -267,18 +288,12 @@
                 }
             }
 
-            // Jeśli plansza się zmieniła, dodaj nowy kafelek
             if (oldBoard !== JSON.stringify(board)) {
                 addRandomTile();
                 drawBoard();
-                // Tu można by dodać sprawdzenie Game Over, 
-                // ale dla urodzinowego ułatwienia pomijamy :)
             }
         }
 
-        // --- OBSŁUGA STEROWANIA ---
-
-        // Klawiatura (PC)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft')  handleMove('LEFT');
             if (e.key === 'ArrowRight') handleMove('RIGHT');
@@ -286,7 +301,6 @@
             if (e.key === 'ArrowDown')  handleMove('DOWN');
         });
 
-        // Swipe (Telefon)
         let touchStartX = 0;
         let touchStartY = 0;
 
@@ -302,20 +316,15 @@
             let dx = touchEndX - touchStartX;
             let dy = touchEndY - touchStartY;
             
-            // Próg minimalnego przesunięcia
             if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
 
-            // Określenie osi ruchu (pozioma vs pionowa)
             if (Math.abs(dx) > Math.abs(dy)) {
-                // Ruch poziomy
                 handleMove(dx > 0 ? 'RIGHT' : 'LEFT');
             } else {
-                // Ruch pionowy
                 handleMove(dy > 0 ? 'DOWN' : 'UP');
             }
         }, false);
 
-        // Start gry
         initGame();
 
     </script>
