@@ -44,7 +44,6 @@
             transition: transform 150ms ease-in-out, opacity 100ms ease-in; z-index: 10;
         }
 
-        /* Kolory kafelków - rozszerzone, bo zdobycie 2305 punktów wymaga wyższych kafelków */
         .tile-2 { background: #eee4da; color: var(--text-dark); }
         .tile-4 { background: #ede0c8; color: var(--text-dark); }
         .tile-8 { background: #f2b179; color: var(--text-light); }
@@ -62,6 +61,7 @@
             padding: 25px; box-sizing: border-box; animation: fadeIn 0.5s ease-in;
         }
 
+        /* EKRAN CIEKAWOSTKI */
         #trivia-overlay { background-color: #2c3e50; color: white; }
         #trivia-overlay h2 { font-size: 36px; color: #f1c40f; margin-bottom: 10px; margin-top: 0; }
         #trivia-overlay p { font-size: 18px; line-height: 1.5; max-width: 400px; margin-bottom: 25px; color: #ecf0f1; }
@@ -72,17 +72,29 @@
         }
         #trivia-overlay button:active { transform: scale(0.95); }
 
+        /* EKRAN ŻYCZEŃ */
         #victory-overlay { background-color: rgba(255, 255, 255, 0.98); overflow-y: auto; }
         #victory-overlay h2 { font-size: 32px; color: #d35400; margin-top: 0; }
         #victory-overlay .wishes-text { font-size: 16px; line-height: 1.6; text-align: left; max-width: 450px; color: #444; }
         #victory-overlay img { max-width: 250px; border-radius: 10px; margin-top: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        /* EKRAN PRZEGRANEJ (GAME OVER) */
+        #gameover-overlay { background-color: rgba(44, 62, 80, 0.95); color: white; }
+        #gameover-overlay h2 { font-size: 36px; color: #e74c3c; margin-bottom: 10px; margin-top: 0; }
+        #gameover-overlay p { font-size: 18px; line-height: 1.5; max-width: 400px; margin-bottom: 25px; color: #ecf0f1; }
+        #gameover-overlay button {
+            padding: 12px 25px; font-size: 18px; font-weight: bold;
+            background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.1s;
+        }
+        #gameover-overlay button:active { transform: scale(0.95); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         @media (max-width: 600px) {
             h1 { font-size: 24px; }
             #victory-overlay { justify-content: flex-start; padding-top: 40px; }
-            #trivia-overlay p { font-size: 16px; }
+            #trivia-overlay p, #gameover-overlay p { font-size: 16px; }
         }
     </style>
 </head>
@@ -118,9 +130,18 @@
         <img src="nasze-zdjecie.jpg" alt="My" onerror="this.style.display='none'">
     </div>
 
+    <div id="gameover-overlay" class="overlay">
+        <h2>Ups, brak ruchów!</h2>
+        <p>
+            Plansza się zablokowała. <br>
+            Zabrakło Ci tylko <strong id="points-left" style="color: #f1c40f;"></strong> punktów do odblokowania niespodzianki!
+        </p>
+        <button onclick="restartGame()">Zagraj ponownie</button>
+    </div>
+
     <script>
         const size = 4;
-        const targetScore = 2305; // NOWY CEL: 2305 punktów
+        const targetScore = 2305; 
         let board = [], score = 0, isGameWon = false;
 
         const tileContainer = document.getElementById('tile-container');
@@ -132,7 +153,10 @@
 
         function initGame() {
             board = Array(size).fill(0).map(() => Array(size).fill(0));
+            score = 0;
+            isGameWon = false;
             document.getElementById('grid-background').innerHTML = '';
+            
             for(let r=0; r<size; r++) {
                 for(let c=0; c<size; c++) {
                     let cell = document.createElement('div');
@@ -142,7 +166,14 @@
                     document.getElementById('grid-background').appendChild(cell);
                 }
             }
-            addRandomTile(); addRandomTile(); drawBoard();
+            addRandomTile(); 
+            addRandomTile(); 
+            drawBoard();
+        }
+
+        function restartGame() {
+            document.getElementById('gameover-overlay').style.display = 'none';
+            initGame();
         }
 
         function addRandomTile() {
@@ -168,17 +199,36 @@
             scoreDisplay.innerText = score;
         }
 
-        // SPRAWDZANIE WYNIKU
+        // SPRAWDZANIE WYGRANEJ
         function checkWinCondition() {
             if (isGameWon) return false;
 
             if (score >= targetScore) {
                 isGameWon = true; 
-                drawBoard(); // Przerysuj planszę, żeby było widać ostateczny wynik
-                setTimeout(showTrivia, 600); // Pokaż ciekawostkę po pauzie
+                drawBoard(); 
+                setTimeout(showTrivia, 600); 
                 return true;
             }
             return false;
+        }
+
+        // SPRAWDZANIE PRZEGRANEJ (Brak pustych miejsc i brak możliwości połączenia)
+        function checkGameOver() {
+            // Czy są puste pola?
+            for(let r=0; r<size; r++) {
+                for(let c=0; c<size; c++) {
+                    if(board[r][c] === 0) return false; 
+                }
+            }
+            // Czy sąsiadujące kafelki mogą się połączyć?
+            for(let r=0; r<size; r++) {
+                for(let c=0; c<size; c++) {
+                    let val = board[r][c];
+                    if(c < size - 1 && val === board[r][c+1]) return false; // w prawo
+                    if(r < size - 1 && val === board[r+1][c]) return false; // w dół
+                }
+            }
+            return true; // Jeśli nie ma wolnych pól ani opcji połączenia - GAME OVER
         }
 
         function showTrivia() {
@@ -192,56 +242,5 @@
 
         function slide(row) {
             let a = row.filter(v => v);
-            for(let i=0; i<a.length-1; i++) if(a[i]===a[i+1]) { a[i]*=2; score+=a[i]; a[i+1]=0; }
-            a = a.filter(v => v);
-            while(a.length<size) a.push(0);
-            return a;
-        }
-
-        function handleMove(dir) {
-            if(isGameWon) return; 
-            let prev = JSON.stringify(board);
-            if(dir==='LEFT' || dir==='RIGHT') {
-                for(let r=0; r<size; r++) {
-                    if(dir==='RIGHT') board[r].reverse();
-                    board[r] = slide(board[r]);
-                    if(dir==='RIGHT') board[r].reverse();
-                }
-            } else {
-                for(let c=0; c<size; c++) {
-                    let col = []; for(let r=0; r<size; r++) col.push(board[r][c]);
-                    if(dir==='DOWN') col.reverse();
-                    col = slide(col);
-                    if(dir==='DOWN') col.reverse();
-                    for(let r=0; r<size; r++) board[r][c] = col[r];
-                }
-            }
-            
-            if(prev !== JSON.stringify(board)) { 
-                if (!checkWinCondition()) {
-                    addRandomTile(); 
-                    drawBoard();
-                    checkWinCondition(); 
-                }
-            }
-        }
-
-        document.addEventListener('keydown', e => {
-            if(e.key==='ArrowLeft') handleMove('LEFT');
-            if(e.key==='ArrowRight') handleMove('RIGHT');
-            if(e.key==='ArrowUp') handleMove('UP');
-            if(e.key==='ArrowDown') handleMove('DOWN');
-        });
-
-        let tsX, tsY;
-        document.addEventListener('touchstart', e => { tsX=e.touches[0].clientX; tsY=e.touches[0].clientY; });
-        document.addEventListener('touchend', e => {
-            let dx = e.changedTouches[0].clientX - tsX, dy = e.changedTouches[0].clientY - tsY;
-            if(Math.abs(dx)>Math.abs(dy)) { if(Math.abs(dx)>30) handleMove(dx>0?'RIGHT':'LEFT'); }
-            else { if(Math.abs(dy)>30) handleMove(dy>0?'DOWN':'UP'); }
-        });
-
-        initGame();
-    </script>
-</body>
-</html>
+            for(let i=0; i<a.length-1; i++) {
+                if(a[i]===a[i+1
